@@ -1,0 +1,786 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
+  <title>ASTRA — 3D Interactive Solar System Educational Journey</title>
+  <meta name="description" content="A real-time 3D cinematic and educational exploration of our Solar System powered by Three.js, WebGL and GSAP. Discover the Sun, planets, orbital mechanics, and cosmic gravity.">
+  <meta name="keywords" content="Solar System, Three.js, WebGL, Space, Astronomy, Planetary Science, Gravity, Interactive 3D">
+  <meta name="theme-color" content="#02040a">
+
+  <!-- Google Fonts: Space Grotesk & Inter -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+  <link rel="stylesheet" href="css/style.css">
+
+  <!-- GSAP & ScrollTrigger Libraries -->
+  <script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/gsap.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/ScrollTrigger.min.js"></script>
+
+  <!-- ES Module Import Map for Three.js -->
+  <script type="importmap">
+  {
+    "imports": {
+      "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js",
+      "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"
+    }
+  }
+  </script>
+</head>
+<body>
+
+  <!-- WebGL Error Fallback Screen -->
+  <div id="webgl-error-overlay" class="webgl-error-overlay hidden" role="alert" aria-live="assertive">
+    <div class="webgl-error-card">
+      <div class="error-icon">⚠</div>
+      <h2>WebGL Unsupported</h2>
+      <p>Your browser does not support the 3D experience. Please enable WebGL or use a modern browser to explore the Solar System.</p>
+    </div>
+  </div>
+
+  <!-- Progressive Loading Screen -->
+  <div id="app-loader" class="app-loader" role="progressbar" aria-label="Initializing Solar System">
+    <div class="loader-content">
+      <div class="loader-brand">ASTRA</div>
+      <div class="loader-title">INITIALIZING SOLAR SYSTEM</div>
+      <div class="loader-track">
+        <div class="loader-bar" id="loader-bar-fill"></div>
+      </div>
+      <div class="loader-progress" id="loader-progress-val">0%</div>
+      <div class="loader-status">Compiling real-time planetary shaders & orbital physics...</div>
+      <button id="loader-enter-btn" class="loader-enter-btn hidden" aria-label="Enter the Solar System">
+        ENTER THE SOLAR SYSTEM
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <polyline points="9 18 15 12 9 6"></polyline>
+        </svg>
+      </button>
+    </div>
+  </div>
+
+  <!-- Persistent 3D WebGL Canvas Layer -->
+  <div id="canvas-container" class="canvas-container" aria-hidden="true"></div>
+
+  <!-- Transparent Minimal Navigation Bar -->
+  <header class="navbar" role="banner">
+    <div class="nav-container">
+      <a href="#section-hero" class="nav-brand" aria-label="Astra Home">
+        <span class="brand-text">ASTRA</span>
+        <span class="brand-dot"></span>
+      </a>
+
+      <nav class="nav-links" aria-label="Primary Navigation">
+        <a href="#section-hero" class="nav-link">EXPLORE</a>
+        <a href="#section-sun" class="nav-link">THE SUN</a>
+        <a href="#section-earth" class="nav-link">EARTH</a>
+        <a href="#section-gravity" class="nav-link">GRAVITY</a>
+        <a href="#section-cosmic" class="nav-link">COSMOS</a>
+      </nav>
+
+      <div class="nav-actions">
+        <!-- 3D Mode & FPS Status -->
+        <div class="status-badge" title="Real-time WebGL Engine Active">
+          <span class="status-dot"></span>
+          <span class="status-text">3D MODE</span>
+          <span class="status-fps" id="fps-counter">60 FPS</span>
+        </div>
+
+        <!-- Audio Synthesizer Toggle -->
+        <button id="sound-toggle-btn" class="nav-btn sound-btn" aria-label="Toggle Cosmic Soundscape">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
+            <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/>
+            <line x1="23" y1="9" x2="17" y2="15"/>
+            <line x1="17" y1="9" x2="23" y2="15"/>
+          </svg>
+          <span>SOUND: OFF</span>
+        </button>
+
+        <!-- Mobile Hamburger Toggle -->
+        <button id="mobile-menu-btn" class="mobile-menu-btn" aria-label="Open Mobile Menu" aria-expanded="false">
+          <span class="bar"></span>
+          <span class="bar"></span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Mobile Navigation Drawer -->
+  <div id="mobile-nav-drawer" class="mobile-nav-drawer" aria-label="Mobile Navigation">
+    <div class="mobile-nav-inner">
+      <a href="#section-hero" class="mobile-link">EXPLORE</a>
+      <a href="#section-overview" class="mobile-link">SOLAR SYSTEM</a>
+      <a href="#section-sun" class="mobile-link">THE SUN</a>
+      <a href="#section-earth" class="mobile-link">EARTH & MOON</a>
+      <a href="#section-gravity" class="mobile-link">GRAVITY MECHANICS</a>
+      <a href="#section-cosmic" class="mobile-link">COSMIC SCALE</a>
+
+      <div class="mobile-planet-selector">
+        <div class="mobile-subhead">QUICK PLANET SELECTOR</div>
+        <div class="mobile-planets-grid">
+          <button class="nav-planet-link" data-planet="sun">SUN</button>
+          <button class="nav-planet-link" data-planet="mercury">MERCURY</button>
+          <button class="nav-planet-link" data-planet="venus">VENUS</button>
+          <button class="nav-planet-link" data-planet="earth">EARTH</button>
+          <button class="nav-planet-link" data-planet="mars">MARS</button>
+          <button class="nav-planet-link" data-planet="jupiter">JUPITER</button>
+          <button class="nav-planet-link" data-planet="saturn">SATURN</button>
+          <button class="nav-planet-link" data-planet="uranus">URANUS</button>
+          <button class="nav-planet-link" data-planet="neptune">NEPTUNE</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Floating Planet Quick-Selection Bar (Desktop Top Bar) -->
+  <aside class="planet-quick-bar" aria-label="Planet Selector">
+    <div class="quick-bar-wrapper">
+      <button class="nav-planet-link" data-planet="sun" aria-label="Select Sun">SUN</button>
+      <span class="quick-sep">/</span>
+      <button class="nav-planet-link" data-planet="mercury" aria-label="Select Mercury">MERCURY</button>
+      <span class="quick-sep">/</span>
+      <button class="nav-planet-link" data-planet="venus" aria-label="Select Venus">VENUS</button>
+      <span class="quick-sep">/</span>
+      <button class="nav-planet-link" data-planet="earth" aria-label="Select Earth">EARTH</button>
+      <span class="quick-sep">/</span>
+      <button class="nav-planet-link" data-planet="mars" aria-label="Select Mars">MARS</button>
+      <span class="quick-sep">/</span>
+      <button class="nav-planet-link" data-planet="jupiter" aria-label="Select Jupiter">JUPITER</button>
+      <span class="quick-sep">/</span>
+      <button class="nav-planet-link" data-planet="saturn" aria-label="Select Saturn">SATURN</button>
+      <span class="quick-sep">/</span>
+      <button class="nav-planet-link" data-planet="uranus" aria-label="Select Uranus">URANUS</button>
+      <span class="quick-sep">/</span>
+      <button class="nav-planet-link" data-planet="neptune" aria-label="Select Neptune">NEPTUNE</button>
+    </div>
+  </aside>
+
+  <!-- Vertical Solar System Journey Progress Indicator -->
+  <aside class="progress-indicator" aria-label="Journey Progress">
+    <div class="progress-track-line"></div>
+    <div class="progress-item">
+      <button class="progress-dot active" data-target="hero" aria-label="Jump to Overview"></button>
+      <span class="progress-label">ORIGIN</span>
+    </div>
+    <div class="progress-item">
+      <button class="progress-dot" data-target="sun" aria-label="Jump to The Sun"></button>
+      <span class="progress-label">SUN</span>
+    </div>
+    <div class="progress-item">
+      <button class="progress-dot" data-target="mercury" aria-label="Jump to Mercury"></button>
+      <span class="progress-label">MERCURY</span>
+    </div>
+    <div class="progress-item">
+      <button class="progress-dot" data-target="venus" aria-label="Jump to Venus"></button>
+      <span class="progress-label">VENUS</span>
+    </div>
+    <div class="progress-item">
+      <button class="progress-dot" data-target="earth" aria-label="Jump to Earth"></button>
+      <span class="progress-label">EARTH</span>
+    </div>
+    <div class="progress-item">
+      <button class="progress-dot" data-target="mars" aria-label="Jump to Mars"></button>
+      <span class="progress-label">MARS</span>
+    </div>
+    <div class="progress-item">
+      <button class="progress-dot" data-target="asteroidBelt" aria-label="Jump to Asteroid Belt"></button>
+      <span class="progress-label">ASTEROIDS</span>
+    </div>
+    <div class="progress-item">
+      <button class="progress-dot" data-target="jupiter" aria-label="Jump to Jupiter"></button>
+      <span class="progress-label">JUPITER</span>
+    </div>
+    <div class="progress-item">
+      <button class="progress-dot" data-target="saturn" aria-label="Jump to Saturn"></button>
+      <span class="progress-label">SATURN</span>
+    </div>
+    <div class="progress-item">
+      <button class="progress-dot" data-target="uranus" aria-label="Jump to Uranus"></button>
+      <span class="progress-label">URANUS</span>
+    </div>
+    <div class="progress-item">
+      <button class="progress-dot" data-target="neptune" aria-label="Jump to Neptune"></button>
+      <span class="progress-label">NEPTUNE</span>
+    </div>
+    <div class="progress-item">
+      <button class="progress-dot" data-target="cosmic" aria-label="Jump to Deep Space"></button>
+      <span class="progress-label">COSMOS</span>
+    </div>
+  </aside>
+
+  <!-- Floating Time Simulation Control Panel -->
+  <aside class="time-control-hud" aria-label="Time Simulation Controls">
+    <div class="hud-panel">
+      <div class="hud-header">
+        <span class="hud-title">ORBITAL TIME</span>
+        <span class="hud-speed-badge" id="speed-display-val">1×</span>
+      </div>
+
+      <div class="hud-controls-row">
+        <button id="btn-time-play" class="hud-btn primary-btn" aria-label="Pause Simulation">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
+            <rect x="6" y="4" width="4" height="16"/>
+            <rect x="14" y="4" width="4" height="16"/>
+          </svg>
+          <span>PAUSE</span>
+        </button>
+
+        <button id="btn-time-reset" class="hud-btn icon-btn" aria-label="Reset Simulation Speed" title="Reset Speed">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/>
+            <path d="M3 3v5h5"/>
+          </svg>
+        </button>
+      </div>
+
+      <div class="speed-selector">
+        <button class="speed-btn active" data-speed="1" aria-label="1x Speed">1×</button>
+        <button class="speed-btn" data-speed="10" aria-label="10x Speed">10×</button>
+        <button class="speed-btn" data-speed="100" aria-label="100x Speed">100×</button>
+        <button class="speed-btn" data-speed="1000" aria-label="1000x Speed">1000×</button>
+      </div>
+    </div>
+  </aside>
+
+  <!-- Interactive 3D Hover Tooltip -->
+  <div id="planet-hover-tooltip" class="planet-hover-tooltip" aria-hidden="true"></div>
+
+  <!-- Detailed Scientific Planet Inspector Modal / Glassmorphic HUD -->
+  <div id="planet-inspector-modal" class="inspector-modal" role="dialog" aria-modal="true" aria-labelledby="inspector-title">
+    <div class="inspector-card">
+      <button id="inspector-close-btn" class="inspector-close" aria-label="Close Inspector">✕</button>
+
+      <div class="inspector-header">
+        <span class="inspector-badge" id="inspector-type">TERRESTRIAL PLANET</span>
+        <h2 class="inspector-title" id="inspector-title">EARTH</h2>
+        <p class="inspector-desc" id="inspector-desc">Loading planetary description...</p>
+      </div>
+
+      <div class="inspector-stats-section">
+        <div class="inspector-subhead">ASTRONOMICAL PARAMETERS</div>
+        <div class="inspector-stats-grid" id="inspector-stats-grid">
+          <!-- Dynamically populated stats -->
+        </div>
+      </div>
+
+      <div class="inspector-facts-section">
+        <div class="inspector-subhead">SCIENTIFIC OBSERVATIONS</div>
+        <ul class="inspector-facts-list" id="inspector-facts-list">
+          <!-- Dynamically populated facts -->
+        </ul>
+      </div>
+
+      <div class="inspector-actions">
+        <button id="inspector-focus-btn" class="hud-btn primary-btn" aria-label="Focus Orbit in 3D">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="10"/>
+            <line x1="22" y1="12" x2="18" y2="12"/>
+            <line x1="6" y1="12" x2="2" y2="12"/>
+            <line x1="12" y1="6" x2="12" y2="2"/>
+            <line x1="12" y1="22" x2="12" y2="18"/>
+          </svg>
+          FOCUS ORBIT IN 3D
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ======================================================== -->
+  <!-- MAIN SCROLL-DRIVEN EDUCATIONAL STORYTELLING CONTENT -->
+  <!-- ======================================================== -->
+  <main id="story-container" class="story-container">
+
+    <!-- 00. Hero Section -->
+    <section id="section-hero" class="story-section hero-section">
+      <div class="hero-content">
+        <div class="hero-badge">
+          <span class="badge-pulse"></span>
+          REAL-TIME 3D ASTRONOMICAL SIMULATION
+        </div>
+        <h1 class="hero-title">
+          <span class="hero-title-line">EXPLORE THE</span>
+          <span class="hero-title-line text-glow">SOLAR SYSTEM</span>
+        </h1>
+        <p class="hero-subtitle">An interactive journey through our cosmic neighborhood.</p>
+        <div class="hero-cta-group">
+          <button id="btn-hero-start" class="cta-btn primary-cta" aria-label="Start Exploring Solar System">
+            <span>START EXPLORING</span>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M5 12h14M12 5l7 7-7 7"/>
+            </svg>
+          </button>
+        </div>
+        <div class="hero-scroll-hint">
+          <span>SCROLL TO EXPLORE</span>
+          <div class="scroll-arrow">↓</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 01. Overview Section: Where are we? -->
+    <section id="section-overview" class="story-section">
+      <div class="story-card">
+        <div class="story-meta">
+          <span class="chapter-num">CHAPTER 01</span>
+          <span class="story-tag">COSMIC ADDRESS</span>
+        </div>
+        <h2 class="story-title">Where are we in the Universe?</h2>
+        <p class="story-lead">The Solar System is our gravitational sanctuary within the Orion Arm of the Milky Way galaxy, orbiting approximately 26,000 light-years from the galactic core.</p>
+        <div class="story-stats-row">
+          <div class="story-stat">
+            <span class="stat-num">4.6B</span>
+            <span class="stat-lbl">YEARS OF EVOLUTION</span>
+          </div>
+          <div class="story-stat">
+            <span class="stat-num">8</span>
+            <span class="stat-lbl">MAJOR PLANETS</span>
+          </div>
+          <div class="story-stat">
+            <span class="stat-num">290+</span>
+            <span class="stat-lbl">KNOWN MOONS</span>
+          </div>
+        </div>
+        <p class="story-body">Formed from the gravitational collapse of a giant interstellar molecular cloud, 99.86% of all material coalesced to ignite the Sun, while the remaining protoplanetary disc accreted into worlds, moons, and rings.</p>
+      </div>
+    </section>
+
+    <!-- 02. The Sun Section -->
+    <section id="section-sun" class="story-section">
+      <div class="story-card">
+        <div class="story-meta">
+          <span class="chapter-num">CHAPTER 02</span>
+          <span class="story-tag">STELLAR ANCHOR</span>
+        </div>
+        <h2 class="story-title">THE SUN</h2>
+        <p class="story-lead">The star at the center of our Solar System.</p>
+        
+        <div class="story-stats-grid">
+          <div class="spec-card">
+            <div class="spec-val">YELLOW DWARF</div>
+            <div class="spec-key">STELLAR CLASSIFICATION</div>
+          </div>
+          <div class="spec-card">
+            <div class="spec-val">1,392,700 KM</div>
+            <div class="spec-key">APPROXIMATE DIAMETER</div>
+          </div>
+          <div class="spec-card">
+            <div class="spec-val">5,500 °C</div>
+            <div class="spec-key">SURFACE TEMPERATURE</div>
+          </div>
+          <div class="spec-card">
+            <div class="spec-val">4.6 BILLION YRS</div>
+            <div class="spec-key">SOLAR AGE</div>
+          </div>
+        </div>
+
+        <p class="story-body">Operating as a titanic fusion reactor, the Sun fuses 600 million metric tons of hydrogen into helium every second. Its gravitational grip curves the space around it, governing every planetary trajectory and shielding the system within a vast magnetic bubble known as the Heliosphere.</p>
+        
+        <div class="card-footer">
+          <button class="inline-inspect-btn nav-planet-link" data-planet="sun">INSPECT SOLAR DATA</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- 03. Mercury Section -->
+    <section id="section-mercury" class="story-section">
+      <div class="story-card">
+        <div class="story-meta">
+          <span class="chapter-num">CHAPTER 03</span>
+          <span class="story-tag">INNERMOST WORLD</span>
+        </div>
+        <h2 class="story-title">MERCURY</h2>
+        <p class="story-lead">The scorched, swift messenger enduring extreme thermal extremes.</p>
+        
+        <div class="story-stats-grid">
+          <div class="spec-card">
+            <div class="spec-val">57.9M KM</div>
+            <div class="spec-key">DISTANCE FROM SUN</div>
+          </div>
+          <div class="spec-card">
+            <div class="spec-val">4,879 KM</div>
+            <div class="spec-key">DIAMETER</div>
+          </div>
+          <div class="spec-card">
+            <div class="spec-val">88 DAYS</div>
+            <div class="spec-key">ORBITAL PERIOD</div>
+          </div>
+          <div class="spec-card">
+            <div class="spec-val">58.6 DAYS</div>
+            <div class="spec-key">ROTATION PERIOD</div>
+          </div>
+        </div>
+
+        <p class="story-body">With virtually no atmosphere to trap heat or moderate climate, surface temperatures fluctuate wildly between 430°C in daylight and -180°C at night. Mercury has an unusually massive iron core comprising over 70% of its total planetary radius.</p>
+        
+        <div class="card-footer">
+          <button class="inline-inspect-btn nav-planet-link" data-planet="mercury">INSPECT MERCURY</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- 04. Venus Section -->
+    <section id="section-venus" class="story-section">
+      <div class="story-card">
+        <div class="story-meta">
+          <span class="chapter-num">CHAPTER 04</span>
+          <span class="story-tag">RUNAWAY GREENHOUSE</span>
+        </div>
+        <h2 class="story-title">VENUS</h2>
+        <p class="story-lead">Earth’s shrouded twin world locked in a suffocating thermal trap.</p>
+        
+        <div class="story-stats-grid">
+          <div class="spec-card">
+            <div class="spec-val">108.2M KM</div>
+            <div class="spec-key">DISTANCE FROM SUN</div>
+          </div>
+          <div class="spec-card">
+            <div class="spec-val">12,104 KM</div>
+            <div class="spec-key">DIAMETER</div>
+          </div>
+          <div class="spec-card">
+            <div class="spec-val">224.7 DAYS</div>
+            <div class="spec-key">ORBITAL PERIOD</div>
+          </div>
+          <div class="spec-card">
+            <div class="spec-val">465 °C</div>
+            <div class="spec-key">SURFACE TEMPERATURE</div>
+          </div>
+        </div>
+
+        <p class="story-body">Underneath dense clouds of concentrated sulfuric acid lies an atmospheric pressure 92 times greater than Earth’s. Venus rotates backwards (retrograde) and so sluggishly that a single Venusian day lasts longer than its entire orbital year.</p>
+        
+        <div class="card-footer">
+          <button class="inline-inspect-btn nav-planet-link" data-planet="venus">INSPECT VENUS</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- 05. Earth Section -->
+    <section id="section-earth" class="story-section">
+      <div class="story-card highlight-card">
+        <div class="story-meta">
+          <span class="chapter-num">CHAPTER 05</span>
+          <span class="story-tag glow-tag">THE CRADLE OF LIFE</span>
+        </div>
+        <h2 class="story-title">OUR HOME PLANET</h2>
+        <p class="story-lead">Earth: an oasis of liquid water, active geodynamics, and biological richness.</p>
+        
+        <div class="story-stats-grid">
+          <div class="spec-card">
+            <div class="spec-val">149.6M KM</div>
+            <div class="spec-key">DISTANCE FROM SUN (1 AU)</div>
+          </div>
+          <div class="spec-card">
+            <div class="spec-val">12,742 KM</div>
+            <div class="spec-key">DIAMETER</div>
+          </div>
+          <div class="spec-card">
+            <div class="spec-val">365.25 DAYS</div>
+            <div class="spec-key">ORBITAL PERIOD</div>
+          </div>
+          <div class="spec-card">
+            <div class="spec-val">23.93 HOURS</div>
+            <div class="spec-key">ROTATION PERIOD</div>
+          </div>
+        </div>
+
+        <p class="story-body">Positioned perfectly in the circumstellar habitable zone, Earth sustains liquid oceans across 71% of its surface. A dynamic iron-nickel dynamo generates a protective magnetic shield, while our large tidally locked Moon stabilizes our axial obliquity at 23.44°.</p>
+        
+        <div class="card-footer">
+          <button id="btn-explore-earth" class="cta-btn primary-cta" aria-label="Explore Earth Close Up">
+            <span>EXPLORE EARTH</span>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="12" cy="12" r="10"/>
+              <polygon points="10 8 16 12 10 16 10 8"/>
+            </svg>
+          </button>
+          <button class="inline-inspect-btn nav-planet-link" data-planet="earth">FULL TELEMETRY</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- 06. Mars Section -->
+    <section id="section-mars" class="story-section">
+      <div class="story-card">
+        <div class="story-meta">
+          <span class="chapter-num">CHAPTER 06</span>
+          <span class="story-tag">THE RED PLANET</span>
+        </div>
+        <h2 class="story-title">MARS</h2>
+        <p class="story-lead">A rust-covered planetary desert preserving the relics of ancient rivers.</p>
+        
+        <div class="story-stats-grid">
+          <div class="spec-card">
+            <div class="spec-val">227.9M KM</div>
+            <div class="spec-key">DISTANCE FROM SUN</div>
+          </div>
+          <div class="spec-card">
+            <div class="spec-val">6,779 KM</div>
+            <div class="spec-key">DIAMETER</div>
+          </div>
+          <div class="spec-card">
+            <div class="spec-val">687 DAYS</div>
+            <div class="spec-key">ORBITAL PERIOD</div>
+          </div>
+          <div class="spec-card">
+            <div class="spec-val">2 MOONS</div>
+            <div class="spec-key">PHOBOS & DEIMOS</div>
+          </div>
+        </div>
+
+        <p class="story-body">Mars owes its signature crimson hue to iron oxide minerals across its regolith. It hosts Olympus Mons—the tallest volcano in the Solar System at 21.9 km height—and the massive Valles Marineris canyon system spanning over 4,000 kilometers.</p>
+        
+        <div class="card-footer">
+          <button class="inline-inspect-btn nav-planet-link" data-planet="mars">INSPECT MARS</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- 07. Asteroid Belt Section -->
+    <section id="section-asteroidBelt" class="story-section">
+      <div class="story-card">
+        <div class="story-meta">
+          <span class="chapter-num">CHAPTER 07</span>
+          <span class="story-tag">CIRCUMSTELLAR REMNANTS</span>
+        </div>
+        <h2 class="story-title">THE ASTEROID BELT</h2>
+        <p class="story-lead">Millions of primordial rocky fragments frozen in orbit between Mars and Jupiter.</p>
+        
+        <div class="story-stats-grid">
+          <div class="spec-card">
+            <div class="spec-val">2.2 – 3.2 AU</div>
+            <div class="spec-key">ORBITAL RANGE</div>
+          </div>
+          <div class="spec-card">
+            <div class="spec-val">CERES (940 KM)</div>
+            <div class="spec-key">LARGEST DWARF PLANET</div>
+          </div>
+          <div class="spec-card">
+            <div class="spec-val">1.5M+ OBJECTS</div>
+            <div class="spec-key">BODIES OVER 1 KM</div>
+          </div>
+          <div class="spec-card">
+            <div class="spec-val">~4% LUNAR MASS</div>
+            <div class="spec-key">TOTAL ACCUMULATED MASS</div>
+          </div>
+        </div>
+
+        <p class="story-body">Why is there no planet here? Jupiter’s immense gravitational perturbations continually disrupted these planetesimals, inducing high-velocity collisions that shattered emerging protoplanets instead of permitting peaceful accretion.</p>
+      </div>
+    </section>
+
+    <!-- 08. Jupiter Section -->
+    <section id="section-jupiter" class="story-section">
+      <div class="story-card">
+        <div class="story-meta">
+          <span class="chapter-num">CHAPTER 08</span>
+          <span class="story-tag">KING OF WORLDS</span>
+        </div>
+        <h2 class="story-title">JUPITER</h2>
+        <p class="story-lead">The titan of the planetary family and the gravitational shield of the inner worlds.</p>
+        
+        <div class="story-stats-grid">
+          <div class="spec-card">
+            <div class="spec-val">778.5M KM</div>
+            <div class="spec-key">DISTANCE FROM SUN</div>
+          </div>
+          <div class="spec-card">
+            <div class="spec-val">139,820 KM</div>
+            <div class="spec-key">DIAMETER (11× EARTH)</div>
+          </div>
+          <div class="spec-card">
+            <div class="spec-val">11.86 YEARS</div>
+            <div class="spec-key">ORBITAL PERIOD</div>
+          </div>
+          <div class="spec-card">
+            <div class="spec-val">95 MOONS</div>
+            <div class="spec-key">KNOWN SATELLITES</div>
+          </div>
+        </div>
+
+        <p class="story-body">Holding 2.5 times the mass of all other planets combined, Jupiter’s churning atmosphere features alternating jet-stream cloud belts and the centuries-old anticyclonic storm known as the Great Red Spot. Its massive gravity sweeps up and deflects lethal cometary debris.</p>
+        
+        <div class="card-footer">
+          <button class="inline-inspect-btn nav-planet-link" data-planet="jupiter">INSPECT JUPITER</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- 09. Saturn Section -->
+    <section id="section-saturn" class="story-section">
+      <div class="story-card">
+        <div class="story-meta">
+          <span class="chapter-num">CHAPTER 09</span>
+          <span class="story-tag">RINGED MASTERPIECE</span>
+        </div>
+        <h2 class="story-title">SATURN</h2>
+        <p class="story-lead">Adorned by the most breathtaking and intricate ring system in known astronomy.</p>
+        
+        <div class="story-stats-grid">
+          <div class="spec-card">
+            <div class="spec-val">1.43B KM</div>
+            <div class="spec-key">DISTANCE FROM SUN</div>
+          </div>
+          <div class="spec-card">
+            <div class="spec-val">116,460 KM</div>
+            <div class="spec-key">DIAMETER</div>
+          </div>
+          <div class="spec-card">
+            <div class="spec-val">29.45 YEARS</div>
+            <div class="spec-key">ORBITAL PERIOD</div>
+          </div>
+          <div class="spec-card">
+            <div class="spec-val">0.687 G/CM³</div>
+            <div class="spec-key">DENSITY (FLOATS IN WATER)</div>
+          </div>
+        </div>
+
+        <p class="story-body">Spanning over 280,000 kilometers wide yet averaging just 10 to 30 meters in thickness, Saturn’s rings consist of billions of pristine water-ice particles and pulverized comets. Saturn is home to 146 discovered moons, including Titan with its methane oceans.</p>
+        
+        <div class="card-footer">
+          <button class="inline-inspect-btn nav-planet-link" data-planet="saturn">INSPECT SATURN</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- 10. Uranus Section -->
+    <section id="section-uranus" class="story-section">
+      <div class="story-card">
+        <div class="story-meta">
+          <span class="chapter-num">CHAPTER 10</span>
+          <span class="story-tag">THE SIDEWAYS GIANT</span>
+        </div>
+        <h2 class="story-title">URANUS</h2>
+        <p class="story-lead">The pale cyan ice giant that rolls on its side along the cosmic plane.</p>
+        
+        <div class="story-stats-grid">
+          <div class="spec-card">
+            <div class="spec-val">2.87B KM</div>
+            <div class="spec-key">DISTANCE FROM SUN</div>
+          </div>
+          <div class="spec-card">
+            <div class="spec-val">50,724 KM</div>
+            <div class="spec-key">DIAMETER</div>
+          </div>
+          <div class="spec-card">
+            <div class="spec-val">97.77°</div>
+            <div class="spec-key">AXIAL OBLIQUITY TILT</div>
+          </div>
+          <div class="spec-card">
+            <div class="spec-val">-224 °C</div>
+            <div class="spec-key">RECORD COLDEST TEMP</div>
+          </div>
+        </div>
+
+        <p class="story-body">Uranus was knocked onto its side by a colossal ancient impact during the birth of the Solar System. Consequently, each planetary pole faces 42 years of continuous solar illumination followed by 42 years of perpetual darkness.</p>
+        
+        <div class="card-footer">
+          <button class="inline-inspect-btn nav-planet-link" data-planet="uranus">INSPECT URANUS</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- 11. Neptune Section -->
+    <section id="section-neptune" class="story-section">
+      <div class="story-card">
+        <div class="story-meta">
+          <span class="chapter-num">CHAPTER 11</span>
+          <span class="story-tag">SUPERSONIC ICE REALM</span>
+        </div>
+        <h2 class="story-title">NEPTUNE</h2>
+        <p class="story-lead">Deep cobalt-blue tempest whipped by the fastest supersonic winds in our system.</p>
+        
+        <div class="story-stats-grid">
+          <div class="spec-card">
+            <div class="spec-val">4.50B KM</div>
+            <div class="spec-key">DISTANCE (30 AU)</div>
+          </div>
+          <div class="spec-card">
+            <div class="spec-val">49,244 KM</div>
+            <div class="spec-key">DIAMETER</div>
+          </div>
+          <div class="spec-card">
+            <div class="spec-val">164.8 YEARS</div>
+            <div class="spec-key">ORBITAL PERIOD</div>
+          </div>
+          <div class="spec-card">
+            <div class="spec-val">2,100 KM/H</div>
+            <div class="spec-key">SUPERSONIC WIND SPEEDS</div>
+          </div>
+        </div>
+
+        <p class="story-body">Neptune sits on the frontier of the major planetary zone. Its dynamic interior heat creates furious storms, cirrus methane clouds, and drives nitrogen cryovolcanoes on its captured retrograde moon, Triton.</p>
+        
+        <div class="card-footer">
+          <button class="inline-inspect-btn nav-planet-link" data-planet="neptune">INSPECT NEPTUNE</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- 12. Gravity Visualization Section -->
+    <section id="section-gravity" class="story-section">
+      <div class="story-card gravity-card">
+        <div class="story-meta">
+          <span class="chapter-num">CHAPTER 12</span>
+          <span class="story-tag">ORBITAL MECHANICS</span>
+        </div>
+        <h2 class="story-title">HOW GRAVITY KEEPS PLANETS IN ORBIT</h2>
+        <p class="story-lead">The celestial geometry of perpetual free fall.</p>
+        
+        <div class="gravity-diagram">
+          <div class="diagram-step">
+            <div class="step-num">01</div>
+            <div class="step-title">THE SUN'S MASS</div>
+            <div class="step-desc">With 99.86% of total system mass, the Sun curves the fabric of spacetime into a deep gravitational well.</div>
+          </div>
+          <div class="diagram-arrow">↓</div>
+          <div class="diagram-step">
+            <div class="step-num">02</div>
+            <div class="step-title">GRAVITATIONAL ACCELERATION</div>
+            <div class="step-desc">Every planet is relentlessly pulled inward toward the Sun’s center with force F = G(M₁M₂)/r².</div>
+          </div>
+          <div class="diagram-arrow">↓</div>
+          <div class="diagram-step">
+            <div class="step-num">03</div>
+            <div class="step-title">TANGENTIAL VELOCITY & ORBIT</div>
+            <div class="step-desc">Because planets possess sideways velocity from the primordial disk, they continually fall toward the Sun but miss it forever—resulting in stable closed elliptical orbits.</div>
+          </div>
+        </div>
+
+        <div class="gravity-interactive-bar">
+          <p class="interactive-hint">Use the Orbital Time HUD on the bottom left to pause or accelerate the physics simulation to observe Kepler’s laws in action!</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- 13. Final Cosmic Perspective Section -->
+    <section id="section-cosmic" class="story-section cosmic-section">
+      <div class="story-card cosmic-card">
+        <div class="story-meta">
+          <span class="chapter-num">PERSPECTIVE</span>
+          <span class="story-tag glow-tag">THE BOUNDLESS BEYOND</span>
+        </div>
+        <h2 class="cosmic-title">THE SOLAR SYSTEM IS ONLY A SMALL PART OF THE UNIVERSE</h2>
+        <p class="story-lead">Our entire system—from the blazing Sun to Neptune and the trillion comets in the distant Oort Cloud—is just one planetary family among over 100 billion stars in the Milky Way.</p>
+        <p class="story-sub">OUR COSMIC NEIGHBORHOOD</p>
+        <div class="cosmic-actions">
+          <button id="btn-cosmic-again" class="cta-btn primary-cta" aria-label="Explore Solar System Again">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/>
+              <path d="M3 3v5h5"/>
+            </svg>
+            <span>EXPLORE AGAIN</span>
+          </button>
+          <button id="btn-cosmic-planets" class="cta-btn secondary-cta" aria-label="View All Planets">
+            <span>VIEW PLANETS</span>
+          </button>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- Main ES Module Entry Point -->
+  <script type="module" src="js/main.js"></script>
+</body>
+</html>
