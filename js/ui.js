@@ -1,7 +1,7 @@
 /**
  * ASTRA - User Interface & HUD Controller
  * Manages floating time simulation controls, quick navigation, scientific inspector modal,
- * loading experience, Web Audio ambient space soundscape, and mobile responsive menus.
+ * 3D Planetary Gallery & Orrery modes, loading experience, and Web Audio ambient space soundscape.
  */
 
 import { CELESTIAL_DATA } from './data.js';
@@ -36,6 +36,11 @@ export class SolarUI {
     this.mobileMenuBtn = document.getElementById('mobile-menu-btn');
     this.mobileNav = document.getElementById('mobile-nav-drawer');
 
+    this.galleryModal = document.getElementById('solar-gallery-modal');
+    this.galleryOpenBtn = document.getElementById('btn-open-gallery');
+    this.heroGalleryBtn = document.getElementById('btn-hero-gallery');
+    this.galleryCloseBtn = document.getElementById('gallery-close-btn');
+
     this.loaderEl = document.getElementById('app-loader');
     this.loaderProgress = document.getElementById('loader-progress-val');
     this.loaderBtn = document.getElementById('loader-enter-btn');
@@ -48,6 +53,7 @@ export class SolarUI {
     this.setupPlanetNavigation();
     this.setupProgressIndicator();
     this.setupInspectorModal();
+    this.setupGalleryModal();
     this.setupAudio();
     this.setupMobileMenu();
     this.setupEarthButton();
@@ -73,7 +79,7 @@ export class SolarUI {
     }
 
     this.speedBtns.forEach(btn => {
-      btn.addEventListener('click', (e) => {
+      btn.addEventListener('click', () => {
         const val = parseFloat(btn.dataset.speed);
         if (!isNaN(val)) {
           this.speedMultiplier = val;
@@ -197,7 +203,6 @@ export class SolarUI {
       });
     }
 
-    // Modal action buttons
     const focusBtn = document.getElementById('inspector-focus-btn');
     if (focusBtn) {
       focusBtn.addEventListener('click', () => {
@@ -214,7 +219,6 @@ export class SolarUI {
     const data = CELESTIAL_DATA[planetKey];
     if (!data || !this.inspectorModal) return;
 
-    // Populate data
     const titleEl = document.getElementById('inspector-title');
     const typeEl = document.getElementById('inspector-type');
     const descEl = document.getElementById('inspector-desc');
@@ -227,7 +231,6 @@ export class SolarUI {
     if (descEl) descEl.textContent = data.description;
     if (focusBtn) focusBtn.dataset.currentPlanet = planetKey;
 
-    // Grid stats
     if (statsContainer) {
       statsContainer.innerHTML = '';
       const stats = [
@@ -252,7 +255,6 @@ export class SolarUI {
       });
     }
 
-    // Educational facts
     if (factsList && data.facts) {
       factsList.innerHTML = '';
       data.facts.forEach(fact => {
@@ -271,6 +273,89 @@ export class SolarUI {
       this.inspectorModal.classList.remove('visible');
       document.body.classList.remove('modal-open');
     }
+  }
+
+  // ==========================================
+  // 3D PLANETARY GALLERY & ORRERY MODAL
+  // ==========================================
+
+  setupGalleryModal() {
+    const openModal = () => {
+      if (this.galleryModal) {
+        this.galleryModal.classList.add('visible');
+        document.body.classList.add('modal-open');
+        this.camera.showSolarSystem(2.0);
+      }
+    };
+
+    const closeModal = () => {
+      if (this.galleryModal) {
+        this.galleryModal.classList.remove('visible');
+        document.body.classList.remove('modal-open');
+        this.planets.setGalleryMode('orbit');
+      }
+    };
+
+    if (this.galleryOpenBtn) this.galleryOpenBtn.addEventListener('click', openModal);
+    if (this.heroGalleryBtn) this.heroGalleryBtn.addEventListener('click', openModal);
+    if (this.galleryCloseBtn) this.galleryCloseBtn.addEventListener('click', closeModal);
+
+    // Gallery Mode Tabs
+    const tabOrrery = document.getElementById('tab-gallery-orrery');
+    const tabScale = document.getElementById('tab-gallery-scale');
+    const viewTopBtn = document.getElementById('btn-view-top');
+    const viewIsoBtn = document.getElementById('btn-view-iso');
+    const viewInnerBtn = document.getElementById('btn-view-inner');
+
+    if (tabOrrery) {
+      tabOrrery.addEventListener('click', () => {
+        tabOrrery.classList.add('active');
+        if (tabScale) tabScale.classList.remove('active');
+        this.planets.setGalleryMode('orbit');
+        this.camera.moveTo({ x: 0, y: 240, z: 380 }, { x: 0, y: 0, z: 0 }, 2.0);
+      });
+    }
+
+    if (tabScale) {
+      tabScale.addEventListener('click', () => {
+        tabScale.classList.add('active');
+        if (tabOrrery) tabOrrery.classList.remove('active');
+        this.planets.setGalleryMode('aligned');
+        this.camera.moveTo({ x: 120, y: 35, z: 170 }, { x: 120, y: 0, z: 0 }, 2.2);
+      });
+    }
+
+    if (viewTopBtn) {
+      viewTopBtn.addEventListener('click', () => {
+        this.camera.moveTo({ x: 0, y: 460, z: 1 }, { x: 0, y: 0, z: 0 }, 2.0);
+      });
+    }
+
+    if (viewIsoBtn) {
+      viewIsoBtn.addEventListener('click', () => {
+        this.camera.moveTo({ x: 0, y: 220, z: 360 }, { x: 0, y: 0, z: 0 }, 2.0);
+      });
+    }
+
+    if (viewInnerBtn) {
+      viewInnerBtn.addEventListener('click', () => {
+        this.camera.moveTo({ x: 0, y: 85, z: 130 }, { x: 0, y: 0, z: 0 }, 2.0);
+      });
+    }
+
+    // Gallery Planet Showcase Cards
+    const galleryPlanetCards = document.querySelectorAll('.gallery-card');
+    galleryPlanetCards.forEach(card => {
+      card.addEventListener('click', () => {
+        const planetKey = card.dataset.planet;
+        if (planetKey) {
+          closeModal();
+          this.camera.focusPlanet(planetKey, 2.2);
+          this.openPlanetModal(planetKey);
+          this.updateActiveIndicator(planetKey);
+        }
+      });
+    });
   }
 
   // ==========================================
@@ -333,7 +418,6 @@ export class SolarUI {
         this.audioCtx.resume();
       }
 
-      // Generate a soothing deep space drone: 55Hz (A1) + 82.4Hz (E2) + 110Hz (A2) with low-pass filtering
       const frequencies = [55.0, 82.4, 110.0, 164.8];
       const masterGain = this.audioCtx.createGain();
       masterGain.gain.setValueAtTime(0.01, this.audioCtx.currentTime);
@@ -350,9 +434,7 @@ export class SolarUI {
         osc.type = idx % 2 === 0 ? 'sine' : 'triangle';
         osc.frequency.setValueAtTime(freq, this.audioCtx.currentTime);
 
-        // Subtle detune for rich space shimmer
         osc.detune.setValueAtTime((idx - 1.5) * 4, this.audioCtx.currentTime);
-
         oscGain.gain.setValueAtTime(0.25 / frequencies.length, this.audioCtx.currentTime);
 
         osc.connect(oscGain);
