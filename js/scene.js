@@ -1,6 +1,6 @@
 /**
  * ASTRA - Three.js Scene Setup & Environment
- * Handles WebGLRenderer, PerspectiveCamera, procedural starfields, and space illumination.
+ * Handles WebGLRenderer, PerspectiveCamera, procedural starfields, and multi-source space illumination.
  */
 
 import * as THREE from 'three';
@@ -17,6 +17,8 @@ export class SolarScene {
     this.renderer = null;
     this.sunLight = null;
     this.ambientLight = null;
+    this.cameraLight = null;
+    this.hemiLight = null;
     this.starGroups = [];
 
     this.init();
@@ -44,12 +46,12 @@ export class SolarScene {
 
     // 1. Scene
     this.scene = new THREE.Scene();
-    this.scene.fog = new THREE.FogExp2(0x02040b, 0.00035);
 
     // 2. Camera
-    this.camera = new THREE.PerspectiveCamera(45, this.width / this.height, 0.5, 7000);
-    this.camera.position.set(0, 75, 220);
+    this.camera = new THREE.PerspectiveCamera(45, this.width / this.height, 0.5, 9000);
+    this.camera.position.set(0, 85, 230);
     this.camera.lookAt(0, 0, 0);
+    this.scene.add(this.camera);
 
     // 3. Renderer
     this.renderer = new THREE.WebGLRenderer({
@@ -61,12 +63,12 @@ export class SolarScene {
     this.renderer.setSize(this.width, this.height);
     this.renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, this.isMobile ? 1.5 : 2));
     this.renderer.toneMapping = THREE.ACESFilmicToneMapping;
-    this.renderer.toneMappingExposure = 1.25;
+    this.renderer.toneMappingExposure = 1.35;
     this.renderer.outputColorSpace = THREE.SRGBColorSpace;
     this.renderer.domElement.id = 'solar-canvas';
     this.container.appendChild(this.renderer.domElement);
 
-    // 4. Lighting
+    // 4. Multi-Source Lighting (Ensures planets & moons are radiantly visible from any angle)
     this.setupLighting();
 
     // 5. Procedural Starfields
@@ -77,39 +79,38 @@ export class SolarScene {
   }
 
   setupLighting() {
-    // Point light radiating directly from the Sun at center
-    this.sunLight = new THREE.PointLight(0xfff7e8, 3.8, 4500, 1.15);
+    // 1. Powerful point light radiating from the Sun with gentle decay
+    this.sunLight = new THREE.PointLight(0xfffaea, 7.5, 0, 0.25);
     this.sunLight.position.set(0, 0, 0);
     this.scene.add(this.sunLight);
 
-    // Subtle space ambient light so unlit sides of planets have a natural dark-navy silhouette
-    this.ambientLight = new THREE.AmbientLight(0x09101f, 0.28);
+    // 2. Space ambient light for rich, vibrant visibility of dark sides
+    this.ambientLight = new THREE.AmbientLight(0xd2e3ff, 0.85);
     this.scene.add(this.ambientLight);
 
-    // Very soft directional light for dramatic grazing light across planetary horizons
-    const rimLight = new THREE.DirectionalLight(0x223355, 0.15);
-    rimLight.position.set(30, 80, 50);
-    this.scene.add(rimLight);
+    // 3. Deep space hemisphere light (soft starlight fill)
+    this.hemiLight = new THREE.HemisphereLight(0x8cb4e6, 0x141e30, 0.65);
+    this.scene.add(this.hemiLight);
+
+    // 4. Camera-mounted directional fill light
+    // Keeps the planet surfaces brilliantly clear and illuminated during close-up inspection
+    this.cameraLight = new THREE.DirectionalLight(0xffffff, 0.75);
+    this.cameraLight.position.set(0, 0, 1);
+    this.camera.add(this.cameraLight);
   }
 
   createProceduralStarfields() {
-    // We generate 3 distinct layers of procedural stars using BufferGeometry & Points
-    // Layer 1: Distant deep field (tiny faint stars)
-    // Layer 2: Mid-distance stars with varying astronomical hues (blue, white, amber)
-    // Layer 3: Foreground bright stars with subtle twinkling
-    const starCounts = this.isMobile ? [2000, 1200, 300] : [5500, 3200, 900];
+    const starCounts = this.isMobile ? [2000, 1200, 300] : [6000, 3500, 1000];
 
-    // Star color palette (O, B, A, F, G, K, M stellar spectral classes)
     const starColors = [
-      new THREE.Color(0xffffff), // White (A-class)
-      new THREE.Color(0xdbe9ff), // Bluish white (B-class)
-      new THREE.Color(0xaec8ff), // Blue (O-class)
-      new THREE.Color(0xfff3da), // Warm white (F-class)
-      new THREE.Color(0xffe6a3), // Pale yellow (G-class like Sun)
-      new THREE.Color(0xffcaa1)  // Orange (K-class)
+      new THREE.Color(0xffffff),
+      new THREE.Color(0xdbe9ff),
+      new THREE.Color(0xaec8ff),
+      new THREE.Color(0xfff3da),
+      new THREE.Color(0xffe6a3),
+      new THREE.Color(0xffcaa1)
     ];
 
-    // --- Helper to build a procedural soft circle star sprite ---
     const starTexture = this.generateStarSprite();
 
     // Layer 1: Deep field
@@ -118,7 +119,7 @@ export class SolarScene {
     const deepColors = new Float32Array(starCounts[0] * 3);
 
     for (let i = 0; i < starCounts[0]; i++) {
-      const radius = 1800 + Math.random() * 2800;
+      const radius = 2200 + Math.random() * 3000;
       const theta = 2 * Math.PI * Math.random();
       const phi = Math.acos(2 * Math.random() - 1);
 
@@ -127,7 +128,7 @@ export class SolarScene {
       deepPositions[i * 3 + 2] = radius * Math.cos(phi);
 
       const color = starColors[Math.floor(Math.random() * starColors.length)];
-      const dimFactor = 0.4 + Math.random() * 0.4;
+      const dimFactor = 0.45 + Math.random() * 0.45;
       deepColors[i * 3] = color.r * dimFactor;
       deepColors[i * 3 + 1] = color.g * dimFactor;
       deepColors[i * 3 + 2] = color.b * dimFactor;
@@ -137,11 +138,11 @@ export class SolarScene {
     deepGeo.setAttribute('color', new THREE.BufferAttribute(deepColors, 3));
 
     const deepMat = new THREE.PointsMaterial({
-      size: this.isMobile ? 1.5 : 2.0,
+      size: this.isMobile ? 1.8 : 2.4,
       vertexColors: true,
       map: starTexture,
       transparent: true,
-      opacity: 0.75,
+      opacity: 0.8,
       depthWrite: false,
       blending: THREE.AdditiveBlending
     });
@@ -156,7 +157,7 @@ export class SolarScene {
     const midColors = new Float32Array(starCounts[1] * 3);
 
     for (let i = 0; i < starCounts[1]; i++) {
-      const radius = 700 + Math.random() * 1400;
+      const radius = 900 + Math.random() * 1600;
       const theta = 2 * Math.PI * Math.random();
       const phi = Math.acos(2 * Math.random() - 1);
 
@@ -174,11 +175,11 @@ export class SolarScene {
     midGeo.setAttribute('color', new THREE.BufferAttribute(midColors, 3));
 
     const midMat = new THREE.PointsMaterial({
-      size: this.isMobile ? 2.2 : 3.0,
+      size: this.isMobile ? 2.6 : 3.6,
       vertexColors: true,
       map: starTexture,
       transparent: true,
-      opacity: 0.85,
+      opacity: 0.9,
       depthWrite: false,
       blending: THREE.AdditiveBlending
     });
@@ -193,7 +194,7 @@ export class SolarScene {
     const brightColors = new Float32Array(starCounts[2] * 3);
 
     for (let i = 0; i < starCounts[2]; i++) {
-      const radius = 500 + Math.random() * 900;
+      const radius = 600 + Math.random() * 1100;
       const theta = 2 * Math.PI * Math.random();
       const phi = Math.acos(2 * Math.random() - 1);
 
@@ -201,17 +202,17 @@ export class SolarScene {
       brightPositions[i * 3 + 1] = radius * Math.sin(phi) * Math.sin(theta);
       brightPositions[i * 3 + 2] = radius * Math.cos(phi);
 
-      const color = starColors[Math.floor(Math.random() * 3)]; // predominantly blue/white
-      brightColors[i * 3] = color.r * 1.2;
-      brightColors[i * 3 + 1] = color.g * 1.2;
-      brightColors[i * 3 + 2] = color.b * 1.2;
+      const color = starColors[Math.floor(Math.random() * 3)];
+      brightColors[i * 3] = color.r * 1.3;
+      brightColors[i * 3 + 1] = color.g * 1.3;
+      brightColors[i * 3 + 2] = color.b * 1.3;
     }
 
     brightGeo.setAttribute('position', new THREE.BufferAttribute(brightPositions, 3));
     brightGeo.setAttribute('color', new THREE.BufferAttribute(brightColors, 3));
 
     const brightMat = new THREE.PointsMaterial({
-      size: this.isMobile ? 3.5 : 4.8,
+      size: this.isMobile ? 4.2 : 5.8,
       vertexColors: true,
       map: starTexture,
       transparent: true,
@@ -234,8 +235,8 @@ export class SolarScene {
     const gradient = ctx.createRadialGradient(32, 32, 0, 32, 32, 32);
     gradient.addColorStop(0, 'rgba(255, 255, 255, 1)');
     gradient.addColorStop(0.18, 'rgba(235, 245, 255, 0.9)');
-    gradient.addColorStop(0.45, 'rgba(180, 215, 255, 0.35)');
-    gradient.addColorStop(0.8, 'rgba(100, 160, 255, 0.08)');
+    gradient.addColorStop(0.45, 'rgba(180, 215, 255, 0.4)');
+    gradient.addColorStop(0.8, 'rgba(100, 160, 255, 0.1)');
     gradient.addColorStop(1, 'rgba(0, 0, 0, 0)');
 
     ctx.fillStyle = gradient;

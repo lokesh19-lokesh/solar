@@ -33,7 +33,7 @@ export class SolarCamera {
     this.currentTween = null;
 
     // Default hero pose
-    this.defaultPos = new THREE.Vector3(0, 75, 220);
+    this.defaultPos = new THREE.Vector3(0, 85, 230);
     this.defaultTarget = new THREE.Vector3(0, 0, 0);
 
     // Bind controls change
@@ -152,7 +152,7 @@ export class SolarCamera {
    * Zoom specifically into Earth with close-up observation angle
    */
   zoomToEarth(duration = 2.5) {
-    return this.focusPlanet('earth', duration, new THREE.Vector3(5.5, 2.5, 7.5));
+    return this.focusPlanet('earth', duration, new THREE.Vector3(12.0, 5.5, 15.0));
   }
 
   /**

@@ -21,7 +21,7 @@ export const CELESTIAL_DATA = {
     role: 'Central gravitational anchor; dictates orbital mechanics, solar wind, and heliosphere boundaries.',
     composition: '73.46% Hydrogen, 24.85% Helium, 0.77% Oxygen, 0.29% Carbon, trace metals',
     colorHex: '#ffaa00',
-    visualRadius: 14.0,
+    visualRadius: 18.0,
     orbitRadius: 0,
     orbitSpeed: 0,
     rotationSpeed: 0.003,
@@ -49,9 +49,9 @@ export const CELESTIAL_DATA = {
     gravity: '3.7 m/s² (0.38g)',
     density: '5.43 g/cm³ (second densest after Earth)',
     composition: 'Huge metallic iron core (70% of planet radius) covered by silicate crust',
-    colorHex: '#a89f91',
-    visualRadius: 1.2,
-    orbitRadius: 32,
+    colorHex: '#b5ada3',
+    visualRadius: 2.8,
+    orbitRadius: 36,
     orbitSpeed: 0.04,
     rotationSpeed: 0.008,
     tilt: 0.034,
@@ -78,11 +78,11 @@ export const CELESTIAL_DATA = {
     gravity: '8.87 m/s² (0.904g)',
     density: '5.24 g/cm³',
     composition: 'Carbon dioxide atmosphere (96.5%) with sulfuric acid cloud decks; basaltic volcanic crust',
-    colorHex: '#e3bb7b',
-    visualRadius: 2.1,
-    orbitRadius: 50,
+    colorHex: '#e8c48a',
+    visualRadius: 4.2,
+    orbitRadius: 56,
     orbitSpeed: 0.03,
-    rotationSpeed: -0.004, // Retrograde spin
+    rotationSpeed: -0.004,
     tilt: 177.3,
     facts: [
       'Venus rotates clockwise (retrograde); the Sun rises in the west and sets in the east.',
@@ -107,9 +107,9 @@ export const CELESTIAL_DATA = {
     gravity: '9.81 m/s² (1.0g)',
     density: '5.51 g/cm³ (Densest planet)',
     composition: '78% Nitrogen, 21% Oxygen, 1% Argon & trace gases; iron-nickel core, silicate mantle',
-    colorHex: '#2b82c9',
-    visualRadius: 2.5,
-    orbitRadius: 72,
+    colorHex: '#3a9bf0',
+    visualRadius: 4.6,
+    orbitRadius: 80,
     orbitSpeed: 0.022,
     rotationSpeed: 0.015,
     tilt: 23.44,
@@ -133,10 +133,10 @@ export const CELESTIAL_DATA = {
     rotationPeriod: '27.3 Earth Days (Tidally locked)',
     surfaceTemp: '-130 °C to 120 °C',
     gravity: '1.62 m/s² (0.166g)',
-    colorHex: '#c7c9d0',
-    visualRadius: 0.68,
-    orbitRadius: 6.8, // Orbit around Earth
-    orbitSpeed: 0.06,
+    colorHex: '#d2d5dc',
+    visualRadius: 1.5,
+    orbitRadius: 10.5,
+    orbitSpeed: 0.05,
     facts: [
       'The Moon causes ocean tides, stabilizing Earth’s axial wobble and preventing climate extremes.',
       'Astronauts from the Apollo missions left footprints that will endure for millions of years with no wind or water erosion.',
@@ -155,14 +155,14 @@ export const CELESTIAL_DATA = {
     diameterRaw: 6779,
     orbitalPeriod: '687 Earth Days (1.88 Years)',
     rotationPeriod: '24.62 Hours (1 Martian Sol)',
-    moons: 2, // Phobos & Deimos
+    moons: 2,
     surfaceTemp: 'Average -63 °C (-140 °C to 20 °C)',
     gravity: '3.72 m/s² (0.38g)',
     density: '3.93 g/cm³',
     composition: 'Thin CO2 atmosphere (95.3%); basaltic and iron oxide crust; frozen water/CO2 polar caps',
-    colorHex: '#c45837',
-    visualRadius: 1.6,
-    orbitRadius: 96,
+    colorHex: '#e05d38',
+    visualRadius: 3.4,
+    orbitRadius: 108,
     orbitSpeed: 0.016,
     rotationSpeed: 0.014,
     tilt: 25.19,
@@ -184,9 +184,9 @@ export const CELESTIAL_DATA = {
     largestObject: 'Ceres (Dwarf Planet, 940 km diameter)',
     count: 'Estimated 1.1 to 1.9 million asteroids larger than 1 km',
     composition: 'Carbonaceous (C-type), Silicate (S-type), and Metallic nickel-iron (M-type)',
-    colorHex: '#8e8a84',
-    innerRadius: 122,
-    outerRadius: 156,
+    colorHex: '#a39f97',
+    innerRadius: 135,
+    outerRadius: 175,
     orbitSpeed: 0.008,
     facts: [
       'Contrary to movie depictions, the average distance between asteroids in the belt is roughly 1 million kilometers.',
@@ -206,14 +206,14 @@ export const CELESTIAL_DATA = {
     diameterRaw: 139820,
     orbitalPeriod: '11.86 Earth Years',
     rotationPeriod: '9.93 Hours (Fastest spin in the Solar System)',
-    moons: 95, // Including Io, Europa, Ganymede, Callisto
+    moons: 95,
     surfaceTemp: '-110 °C (cloud deck level)',
     gravity: '24.79 m/s² (2.53g)',
     density: '1.33 g/cm³',
     composition: '89% Hydrogen, 10% Helium, trace methane/ammonia; metallic liquid hydrogen mantle',
-    colorHex: '#d8a97b',
-    visualRadius: 6.2,
-    orbitRadius: 195,
+    colorHex: '#e5b689',
+    visualRadius: 11.0,
+    orbitRadius: 215,
     orbitSpeed: 0.01,
     rotationSpeed: 0.03,
     tilt: 3.13,
@@ -235,19 +235,19 @@ export const CELESTIAL_DATA = {
     diameterRaw: 116460,
     orbitalPeriod: '29.45 Earth Years',
     rotationPeriod: '10.7 Hours',
-    moons: 146, // Titan, Enceladus, Mimas
+    moons: 146,
     surfaceTemp: '-140 °C',
     gravity: '10.44 m/s² (1.06g)',
     density: '0.687 g/cm³ (Floats in water)',
     composition: '96% Hydrogen, 3% Helium, trace methane/ammonia/ethane',
-    colorHex: '#e4cd9e',
-    visualRadius: 5.2,
-    orbitRadius: 260,
+    colorHex: '#f0d9aa',
+    visualRadius: 9.0,
+    orbitRadius: 285,
     orbitSpeed: 0.007,
     rotationSpeed: 0.025,
     tilt: 26.73,
-    ringInner: 7.2,
-    ringOuter: 14.2,
+    ringInner: 12.0,
+    ringOuter: 22.0,
     facts: [
       'Saturn’s rings span 282,000 km across, yet are astonishingly thin—averaging only 10 to 30 meters thick.',
       'Moon Titan possesses a dense nitrogen atmosphere and liquid methane/ethane lakes and rain cycles.',
@@ -266,19 +266,19 @@ export const CELESTIAL_DATA = {
     diameterRaw: 50724,
     orbitalPeriod: '84 Earth Years',
     rotationPeriod: '17.24 Hours (Retrograde spin)',
-    moons: 28, // Miranda, Titania, Oberon, Ariel, Umbriel
+    moons: 28,
     surfaceTemp: '-195 °C to -224 °C (Coldest planetary atmosphere)',
     gravity: '8.69 m/s² (0.886g)',
     density: '1.27 g/cm³',
     composition: '83% Hydrogen, 15% Helium, 2.3% Methane; mantle of super-pressurized water, ammonia, and methane ices',
-    colorHex: '#88d9e6',
-    visualRadius: 3.4,
-    orbitRadius: 325,
+    colorHex: '#94e4f2',
+    visualRadius: 6.2,
+    orbitRadius: 355,
     orbitSpeed: 0.005,
     rotationSpeed: -0.016,
     tilt: 97.77,
-    ringInner: 4.8,
-    ringOuter: 6.8,
+    ringInner: 8.0,
+    ringOuter: 11.5,
     facts: [
       'Because of its 97.77° axial tilt, each pole experiences 42 continuous years of sunlight followed by 42 years of darkness.',
       'A massive ancient collision with an Earth-sized protoplanet is hypothesized to have knocked Uranus onto its side.',
@@ -297,14 +297,14 @@ export const CELESTIAL_DATA = {
     diameterRaw: 49244,
     orbitalPeriod: '164.8 Earth Years',
     rotationPeriod: '16.11 Hours',
-    moons: 16, // Triton, Proteus, Nereid
+    moons: 16,
     surfaceTemp: '-201 °C',
     gravity: '11.15 m/s² (1.14g)',
     density: '1.64 g/cm³',
     composition: '80% Hydrogen, 19% Helium, 1.5% Methane; slushy supercritical water-ammonia mantle',
-    colorHex: '#3d6cb9',
-    visualRadius: 3.3,
-    orbitRadius: 390,
+    colorHex: '#4a7de0',
+    visualRadius: 6.0,
+    orbitRadius: 425,
     orbitSpeed: 0.0035,
     rotationSpeed: 0.018,
     tilt: 28.32,
@@ -328,7 +328,7 @@ export const STORY_CHAPTERS = [
     subtitle: 'An interactive journey through our cosmic neighborhood.',
     question: 'Where are we in the boundless universe?',
     narrative: 'Orbiting a vibrant G-type star on the inner rim of the Orion Arm, our Solar System is an intricate cosmic ballet woven by gravity, thermodynamics, and 4.6 billion years of stellar evolution.',
-    camPos: { x: 0, y: 75, z: 220 },
+    camPos: { x: 0, y: 85, z: 230 },
     lookAt: { x: 0, y: 0, z: 0 }
   },
   {
@@ -339,7 +339,7 @@ export const STORY_CHAPTERS = [
     subtitle: 'Eight planets, one star, infinite wonders.',
     question: 'What constitutes our celestial family?',
     narrative: 'Divided cleanly into the inner rocky worlds, a chaotic asteroid belt, mighty gas giants, freezing ice giants, and the distant frozen Kuiper Belt spanning tens of billions of kilometers.',
-    camPos: { x: 0, y: 190, z: 360 },
+    camPos: { x: 0, y: 195, z: 380 },
     lookAt: { x: 0, y: 0, z: 0 }
   },
   {
@@ -350,7 +350,7 @@ export const STORY_CHAPTERS = [
     subtitle: 'The star at the center of our Solar System.',
     question: 'How does our parent star power the entire system?',
     narrative: 'A raging thermonuclear furnace containing 99.86% of the system’s total mass. Its gravitational well bends spacetime into the orbits that guide every planet, moon, and asteroid.',
-    camPos: { x: 0, y: 16, z: 52 },
+    camPos: { x: 0, y: 18, z: 62 },
     lookAt: { x: 0, y: 0, z: 0 }
   },
   {
@@ -361,8 +361,8 @@ export const STORY_CHAPTERS = [
     subtitle: 'The scorched inner sentry.',
     question: 'Why does Mercury endure such temperature extremes?',
     narrative: 'Lacking a shielding atmosphere, Mercury experiences brutal 600°C temperature swings between blazing day and cryogenic night, orbiting closer to the solar corona than any other world.',
-    camPos: { x: 30, y: 8, z: 42 },
-    lookAt: { x: 32, y: 0, z: 0 }
+    camPos: { x: 36, y: 8, z: 18 },
+    lookAt: { x: 36, y: 0, z: 0 }
   },
   {
     id: 'venus',
@@ -372,8 +372,8 @@ export const STORY_CHAPTERS = [
     subtitle: 'The runaway greenhouse.',
     question: 'How did Earth’s sister planet turn into an inferno?',
     narrative: 'Trapped under an ultra-dense carbon dioxide blanket with sulfuric acid clouds, Venus is the hottest planet in the Solar System, providing a cautionary tale of extreme greenhouse dynamics.',
-    camPos: { x: 48, y: 9, z: 62 },
-    lookAt: { x: 50, y: 0, z: 0 }
+    camPos: { x: 56, y: 10, z: 24 },
+    lookAt: { x: 56, y: 0, z: 0 }
   },
   {
     id: 'earth',
@@ -383,8 +383,8 @@ export const STORY_CHAPTERS = [
     subtitle: 'The sanctuary of life.',
     question: 'How does Earth harbor liquid oceans and life?',
     narrative: 'Positioned precisely in the circumstellar Goldilocks zone, Earth combines an active tectonic heat engine, an atmosphere rich in oxygen and nitrogen, and a stabilizing celestial Moon.',
-    camPos: { x: 70, y: 10, z: 86 },
-    lookAt: { x: 72, y: 0, z: 0 }
+    camPos: { x: 80, y: 12, z: 28 },
+    lookAt: { x: 80, y: 0, z: 0 }
   },
   {
     id: 'mars',
@@ -394,8 +394,8 @@ export const STORY_CHAPTERS = [
     subtitle: 'The crimson frontier.',
     question: 'Where did the ancient Martian water go?',
     narrative: 'Once warm and wet with expansive seas, Mars lost its global magnetic shield to core cooling billions of years ago. Solar winds stripped its air, leaving a frozen rust-covered planetary desert.',
-    camPos: { x: 94, y: 8, z: 110 },
-    lookAt: { x: 96, y: 0, z: 0 }
+    camPos: { x: 108, y: 10, z: 22 },
+    lookAt: { x: 108, y: 0, z: 0 }
   },
   {
     id: 'asteroidBelt',
@@ -405,8 +405,8 @@ export const STORY_CHAPTERS = [
     subtitle: 'The primordial building blocks.',
     question: 'Why did no planet form between Mars and Jupiter?',
     narrative: 'Jupiter’s colossal gravitational resonance continuously stirred this zone, accelerating planetesimals to violent collision speeds that shattered emerging bodies rather than allowing them to accrete.',
-    camPos: { x: 0, y: 50, z: 175 },
-    lookAt: { x: 139, y: 0, z: 0 }
+    camPos: { x: 0, y: 65, z: 205 },
+    lookAt: { x: 155, y: 0, z: 0 }
   },
   {
     id: 'jupiter',
@@ -416,8 +416,8 @@ export const STORY_CHAPTERS = [
     subtitle: 'The colossal protector.',
     question: 'How does Jupiter shield the inner terrestrial worlds?',
     narrative: 'Over two and a half times more massive than all other planets combined, Jupiter acts as a gravitational shield, capturing and deflecting stray comets and asteroids away from Earth.',
-    camPos: { x: 190, y: 22, z: 225 },
-    lookAt: { x: 195, y: 0, z: 0 }
+    camPos: { x: 215, y: 26, z: 52 },
+    lookAt: { x: 215, y: 0, z: 0 }
   },
   {
     id: 'saturn',
@@ -427,8 +427,8 @@ export const STORY_CHAPTERS = [
     subtitle: 'The ringed jewel.',
     question: 'What created Saturn’s magnificent rings?',
     narrative: 'Composed of billions of water-ice fragments and dust grains from disintegrated comets and icy moons torn apart by tidal gravitational forces within Saturn’s Roche limit.',
-    camPos: { x: 254, y: 24, z: 295 },
-    lookAt: { x: 260, y: 0, z: 0 }
+    camPos: { x: 285, y: 30, z: 58 },
+    lookAt: { x: 285, y: 0, z: 0 }
   },
   {
     id: 'uranus',
@@ -438,8 +438,8 @@ export const STORY_CHAPTERS = [
     subtitle: 'The rolling ice giant.',
     question: 'Why does Uranus rotate almost completely on its side?',
     narrative: 'Tilted at an astonishing 97.77°—likely the violent souvenir of a cataclysmic impact with an Earth-sized protoplanet during the early violent formation era of the Solar System.',
-    camPos: { x: 320, y: 16, z: 355 },
-    lookAt: { x: 325, y: 0, z: 0 }
+    camPos: { x: 355, y: 22, z: 42 },
+    lookAt: { x: 355, y: 0, z: 0 }
   },
   {
     id: 'neptune',
@@ -449,8 +449,8 @@ export const STORY_CHAPTERS = [
     subtitle: 'The deep blue tempest.',
     question: 'What fuels supersonic 2,100 km/h winds so far from the Sun?',
     narrative: 'Despite receiving 900 times less sunlight than Earth, Neptune’s warm internal core radiates heat upward, driving severe atmospheric convection storms across deep methane clouds.',
-    camPos: { x: 384, y: 16, z: 420 },
-    lookAt: { x: 390, y: 0, z: 0 }
+    camPos: { x: 425, y: 22, z: 42 },
+    lookAt: { x: 425, y: 0, z: 0 }
   },
   {
     id: 'gravity',
@@ -460,7 +460,7 @@ export const STORY_CHAPTERS = [
     subtitle: 'How gravity orchestrates planetary motion.',
     question: 'How does gravity keep planets in stable orbits?',
     narrative: 'Isaac Newton and Albert Einstein revealed that planets are in perpetual free fall toward the Sun, but their sideways orbital velocity constantly causes them to miss it, creating enduring elliptical orbits.',
-    camPos: { x: 0, y: 260, z: 380 },
+    camPos: { x: 0, y: 280, z: 430 },
     lookAt: { x: 0, y: 0, z: 0 }
   },
   {
@@ -471,7 +471,7 @@ export const STORY_CHAPTERS = [
     subtitle: 'The Solar System is only a small part of the Universe.',
     question: 'How far does the Solar System extend?',
     narrative: 'Beyond Neptune lies the Kuiper Belt, the scattered disc, and the spherical Oort Cloud spanning nearly 100,000 AU (over 1.5 light-years)—just one of hundreds of billions of planetary systems in the Milky Way.',
-    camPos: { x: 0, y: 650, z: 1200 },
+    camPos: { x: 0, y: 750, z: 1350 },
     lookAt: { x: 0, y: 0, z: 0 }
   }
 ];
